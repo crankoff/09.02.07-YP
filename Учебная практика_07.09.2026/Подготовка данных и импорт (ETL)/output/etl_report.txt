@@ -1,0 +1,22 @@
+ОТЧЁТ ETL
+
+Исходных строк партнёров: 3
+Импортировано партнёров: 3
+Исходных строк продаж: 5
+Импортировано продаж: 4
+Отклонено строк: 1
+
+Преобразования:
+- empty_to_null: 2
+- normalized_dates: 1
+- normalized_phones: 2
+- trimmed_names: 2
+- trimmed_product_names: 0
+
+Проверка SELECT COUNT(*):
+- partners: 3
+- products: 3
+- sales: 4
+
+Отклонённые строки:
+- import_sales.txt, строка 5, id=104: partner_id=4 отсутствует в файле партнёров

@@ -1,0 +1,2 @@
+source,row_number,record_id,reason,raw_data
+import_sales.txt,5,104,partner_id=4 отсутствует в файле партнёров,"{""partner_id"": ""4"", ""product_name"": ""Стиральный порошок \""Альфа\"""", ""quantity"": ""10"", ""sale_date"": ""2026-03-22"", ""sale_id"": ""104"", ""total_amount"": ""5000.00""}"
