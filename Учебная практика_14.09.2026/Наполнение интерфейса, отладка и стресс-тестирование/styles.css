@@ -1,0 +1,276 @@
+:root {
+  color-scheme: light;
+  --background: #f4f4f5;
+  --surface: #ffffff;
+  --text: #18181b;
+  --muted: #71717a;
+  --border: #a1a1aa;
+  --accent: #ec007a;
+  --accent-dark: #c90068;
+  --accent-light: #fce7f3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--background);
+  color: var(--text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid #e4e4e7;
+  backdrop-filter: blur(10px);
+}
+
+.app-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(1120px, calc(100% - 40px));
+  min-height: 92px;
+  margin: 0 auto;
+}
+
+.company-logo {
+  display: block;
+  width: 310px;
+  max-width: 60vw;
+  height: auto;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 20px;
+  background: var(--accent);
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+button:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+button:focus-visible {
+  outline: 3px solid rgba(236, 0, 122, 0.28);
+  outline-offset: 3px;
+}
+
+main {
+  width: min(1040px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 44px 0 32px;
+}
+
+.page-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  line-height: 1.1;
+}
+
+.page-heading p:last-child {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 1.02rem;
+}
+
+.counter {
+  display: grid;
+  min-width: 112px;
+  padding: 14px 18px;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.counter b {
+  color: var(--accent);
+  font-size: 1.6rem;
+}
+
+.counter span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.partner-list {
+  display: grid;
+  gap: 16px;
+}
+
+.partner-card {
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  box-shadow: 0 1px 1px rgba(24, 24, 27, 0.03);
+}
+
+.partner-card__top,
+.partner-card__body {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.partner-card h2 {
+  margin: 0;
+  font-size: 1.18rem;
+  line-height: 1.3;
+}
+
+.partner-card h2 span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.discount {
+  align-self: start;
+  min-width: 76px;
+  border-radius: 7px;
+  padding: 8px 12px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.partner-card__body {
+  align-items: end;
+  margin-top: 16px;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 9px 28px;
+  margin: 0;
+}
+
+.details div {
+  display: grid;
+  grid-template-columns: 105px 1fr;
+  gap: 8px;
+}
+
+.details dt {
+  color: var(--muted);
+}
+
+.details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.quantity {
+  display: grid;
+  min-width: 170px;
+  text-align: right;
+}
+
+.quantity span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.quantity b {
+  margin-top: 5px;
+  font-size: 1.08rem;
+}
+
+footer {
+  padding: 22px 2px 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+footer span {
+  padding: 0 8px;
+  color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  .app-header__inner,
+  main {
+    width: min(100% - 24px, 1040px);
+  }
+
+  .app-header__inner {
+    min-height: 76px;
+  }
+
+  .company-logo {
+    width: 220px;
+  }
+
+  .page-heading,
+  .partner-card__body {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .counter {
+    align-self: start;
+  }
+
+  .details {
+    grid-template-columns: 1fr;
+  }
+
+  .quantity {
+    text-align: left;
+  }
+}
+
+@media (max-width: 520px) {
+  .company-logo {
+    width: 190px;
+  }
+
+  button {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  main {
+    padding-top: 30px;
+  }
+
+  .partner-card {
+    padding: 18px;
+  }
+
+  .details div {
+    grid-template-columns: 95px 1fr;
+  }
+}
