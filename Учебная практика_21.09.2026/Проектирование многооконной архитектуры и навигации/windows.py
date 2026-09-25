@@ -1,0 +1,145 @@
+from __future__ import annotations
+
+from html import escape
+
+from database import Partner
+
+
+def render_layout(window_title: str, content: str) -> str:
+    return f"""<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{escape(window_title)}</title>
+  <link rel="icon" href="/resources/app_icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header__inner">
+      <img class="company-logo" src="/resources/company_logo.svg" alt="Логотип компании">
+      <span class="section-label">CRM · ПАРТНЁРЫ</span>
+    </div>
+  </header>
+  {content}
+</body>
+</html>
+"""
+
+
+class MainWindow:
+    window_title = "CRM: Реестр партнёров"
+
+    def render(self, partners: list[Partner]) -> str:
+        partner_cards = "\n".join(self._render_partner(partner) for partner in partners)
+        content = f"""
+  <main>
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">ГЛАВНОЕ ОКНО</p>
+        <h1>Реестр партнёров</h1>
+        <p>Просмотр и редактирование карточек партнёров</p>
+      </div>
+      <a class="button" href="/partner/new">Добавить партнёра</a>
+    </section>
+    <section class="partner-list" aria-label="Список партнёров">
+      {partner_cards}
+    </section>
+    <footer>Всего партнёров: <b>{len(partners)}</b></footer>
+  </main>
+"""
+        return render_layout(self.window_title, content)
+
+    @staticmethod
+    def _render_partner(partner: Partner) -> str:
+        return f"""
+      <article class="partner-card">
+        <div>
+          <p class="partner-type">{escape(partner.partner_type)}</p>
+          <h2>{escape(partner.name)}</h2>
+          <dl>
+            <div><dt>Директор</dt><dd>{escape(partner.director)}</dd></div>
+            <div><dt>Телефон</dt><dd>{escape(partner.phone)}</dd></div>
+            <div><dt>Email</dt><dd>{escape(partner.email)}</dd></div>
+          </dl>
+        </div>
+        <div class="partner-card__aside">
+          <span>Рейтинг</span>
+          <strong>{partner.rating} / 10</strong>
+          <a class="secondary-button" href="/partner/{partner.partner_id}/edit">Редактировать</a>
+        </div>
+      </article>
+"""
+
+
+class PartnerEditWindow:
+    add_window_title = "CRM: Карточка партнёра [Добавление]"
+    edit_window_title = "CRM: Карточка партнёра [Редактирование]"
+
+    def render(self, partner: Partner | None = None, error: str = "") -> str:
+        is_editing = partner is not None and partner.partner_id is not None
+        current = partner or Partner(None, "ООО", "", "", "", "", 0)
+        title = self.edit_window_title if is_editing else self.add_window_title
+        action_name = "Редактирование" if is_editing else "Добавление"
+        error_block = (
+            f'<p class="error" role="alert">{escape(error)}</p>' if error else ""
+        )
+        content = f"""
+  <main class="form-page">
+    <nav class="breadcrumbs" aria-label="Навигация">
+      <a href="/">Реестр партнёров</a><span>→</span><b>{action_name}</b>
+    </nav>
+    <section class="form-panel">
+      <div class="form-panel__heading">
+        <div>
+          <p class="eyebrow">КАРТОЧКА ПАРТНЁРА</p>
+          <h1>{action_name} партнёра</h1>
+          <p>Заполните контактные данные и рейтинг компании</p>
+        </div>
+        <span class="mode-badge">{action_name}</span>
+      </div>
+      {error_block}
+      <form action="/partner/save" method="post">
+        <input type="hidden" name="partner_id" value="{current.partner_id or ''}">
+        <div class="form-grid">
+          <label>Тип партнёра
+            <select name="partner_type" required>
+              {self._type_options(current.partner_type)}
+            </select>
+          </label>
+          <label>Наименование
+            <input name="name" value="{escape(current.name)}" required maxlength="150">
+          </label>
+          <label class="wide">Директор
+            <input name="director" value="{escape(current.director)}" required maxlength="150">
+          </label>
+          <label>Телефон
+            <input name="phone" value="{escape(current.phone)}" required maxlength="30">
+          </label>
+          <label>Email
+            <input name="email" type="email" value="{escape(current.email)}" required maxlength="150">
+          </label>
+          <label>Рейтинг
+            <input name="rating" type="number" min="0" max="10" value="{current.rating}" required>
+          </label>
+        </div>
+        <div class="form-actions">
+          <a class="secondary-button" href="/">Назад</a>
+          <button type="submit">Сохранить</button>
+        </div>
+      </form>
+    </section>
+  </main>
+"""
+        return render_layout(title, content)
+
+    @staticmethod
+    def _type_options(selected_type: str) -> str:
+        options = []
+        for partner_type in ("ООО", "ИП", "АО", "ПАО"):
+            selected = " selected" if partner_type == selected_type else ""
+            options.append(
+                f'<option value="{partner_type}"{selected}>{partner_type}</option>'
+            )
+        return "".join(options)
