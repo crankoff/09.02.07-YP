@@ -1,0 +1,12 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS partners (
+    partner_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partner_type VARCHAR(50) NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    address VARCHAR(250) NOT NULL,
+    director VARCHAR(150) NOT NULL,
+    phone VARCHAR(30) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    rating INTEGER NOT NULL CHECK (rating >= 0)
+);
