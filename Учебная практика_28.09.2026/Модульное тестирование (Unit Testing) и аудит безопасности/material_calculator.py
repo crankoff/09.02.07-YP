@@ -1,0 +1,105 @@
+from __future__ import annotations
+
+from decimal import Decimal, InvalidOperation, ROUND_CEILING
+import logging
+from pathlib import Path
+import sqlite3
+
+from logging_config import create_logger
+
+
+PRODUCT_COEFFICIENT_QUERY = """
+    SELECT coefficient
+    FROM product_types
+    WHERE product_type_id = ?
+"""
+
+MATERIAL_WASTE_QUERY = """
+    SELECT waste_percent
+    FROM material_types
+    WHERE material_type_id = ?
+"""
+
+
+class MaterialCalculator:
+    def __init__(
+        self,
+        database_path: Path | str,
+        logger: logging.Logger | None = None,
+    ) -> None:
+        self.database_path = Path(database_path)
+        self.logger = logger or create_logger()
+
+    def calculate_material_amount(
+        self,
+        product_type_id: int,
+        material_type_id: int,
+        quantity: int,
+        param_1: float,
+        param_2: float,
+    ) -> int:
+        if not self._valid_integer(product_type_id):
+            self.logger.warning("Некорректный ID типа продукции")
+            return -1
+        if not self._valid_integer(material_type_id):
+            self.logger.warning("Некорректный ID типа материала")
+            return -1
+        if not self._valid_integer(quantity):
+            self.logger.warning("Количество продукции должно быть больше нуля")
+            return -1
+        if not self._valid_parameter(param_1):
+            self.logger.warning("Параметр 1 должен быть положительным числом")
+            return -1
+        if not self._valid_parameter(param_2):
+            self.logger.warning("Параметр 2 должен быть положительным числом")
+            return -1
+
+        try:
+            product_coefficient = self._get_reference_value(
+                PRODUCT_COEFFICIENT_QUERY,
+                product_type_id,
+            )
+            waste_percent = self._get_reference_value(
+                MATERIAL_WASTE_QUERY,
+                material_type_id,
+            )
+            if product_coefficient is None or waste_percent is None:
+                self.logger.warning("Передан несуществующий ID справочника")
+                return -1
+
+            base_amount = (
+                Decimal(str(param_1))
+                * Decimal(str(param_2))
+                * product_coefficient
+            )
+            clean_amount = base_amount * Decimal(quantity)
+            final_amount = clean_amount * (
+                Decimal("1") + waste_percent / Decimal("100")
+            )
+            return int(final_amount.to_integral_value(rounding=ROUND_CEILING))
+        except (InvalidOperation, OSError, sqlite3.Error, ValueError) as error:
+            self.logger.exception("Ошибка обращения к справочникам: %s", error)
+            return -1
+
+    def _get_reference_value(
+        self,
+        query: str,
+        reference_id: int,
+    ) -> Decimal | None:
+        with sqlite3.connect(self.database_path) as connection:
+            row = connection.execute(query, (reference_id,)).fetchone()
+        return Decimal(str(row[0])) if row is not None else None
+
+    @staticmethod
+    def _valid_integer(value: object) -> bool:
+        return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+    @staticmethod
+    def _valid_parameter(value: object) -> bool:
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            return False
+        try:
+            decimal_value = Decimal(str(value))
+            return decimal_value.is_finite() and decimal_value > 0
+        except (InvalidOperation, ValueError):
+            return False
